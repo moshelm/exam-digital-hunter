@@ -4,7 +4,7 @@ from shared.mongodb_manager import MongodbManager
 from shared.logger import log_event
 from validate_manager import Validator
 from shared.haversine import haversine_km
-
+from datetime import datetime
 
 class Orchestrator():
     def __init__(self, mongodb: MongodbManager, producer:KafkaProducer, consumer:KafkaConsumer, mongodb_collection_base:str, validator:Validator):
@@ -49,7 +49,7 @@ class Orchestrator():
                 if doc_in_bank.get('attacks_numbers'):
                     new_details['attacks_numbers'] +=doc_in_bank['attacks_numbers']
                 if doc_in_bank.get('last_time_update_location'):
-                    if doc_in_bank['last_time_update_location'] > new_details['last_time_update_location']:
+                    if datetime.fromisoformat(doc_in_bank['last_time_update_location']) > datetime.fromisoformat(new_details['last_time_update_location']):
                         new_details['last_time_update_location'] = doc_in_bank['last_time_update_location']
                     else:
                         new_details['distance_from_last_location'] = haversine_km(doc_in_bank['reported_lat'],doc_in_bank['reported_lon'],event['reported_lat'],event['reported_lon'])
