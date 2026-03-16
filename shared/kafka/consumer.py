@@ -1,5 +1,5 @@
 from confluent_kafka import Consumer
-from utils.serializer import deserialize_json
+from shared.utils.serializer import deserialize_json
 from shared.logger import log_event
 
 class KafkaConsumer():

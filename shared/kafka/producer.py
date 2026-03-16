@@ -1,6 +1,6 @@
 from confluent_kafka import Producer, Message
 from shared.logger import log_event
-from utils.serializer import serialize_json
+from shared.utils.serializer import serialize_json
 
 class KafkaProducer():
     def __init__(self,kafka_config:dict, topic_name:str):
