@@ -18,11 +18,13 @@ class Orchestrator():
         try:
             doc = {'entity_id':event['entity_id'],
                 'status':'destroyed'}
-            if self.mongodb.db[self.collection_base].find_one(doc):
+            result = self.mongodb.db[self.collection_base].find_one(doc)
+            log_event('info','success is_already_destroyed')
+            if result:
                 return True
             return False
         except Exception:
-            log_event()
+            log_event('error','failed is_already_destroyed check')
 
     def update_bank(self,topic:str, event:dict):
         try:
@@ -45,6 +47,7 @@ class Orchestrator():
                 new_details['priority_level'] = 99
                 new_details['distance_from_last_location'] = 0
                 self.mongodb.db[self.collection_base].insert_one(new_details)
+                log_event('info','new entity in target bank',{'entity_id':entity_id})
             else:
                 if doc_in_bank.get('attacks_numbers'):
                     new_details['attacks_numbers'] +=doc_in_bank['attacks_numbers']
@@ -60,14 +63,15 @@ class Orchestrator():
                         new_details['status'] = doc_in_bank['status']
             
                 self.mongodb.db[self.collection_base].update_one({'entity_id':entity_id},new_details,True)
+                log_event('info','update document',{'entity_id':entity_id})
         except Exception:
-            log_event()
+            log_event('error','failed to upsert in target bank',{'entity_id':entity_id})
 
 
     def handle_event(self,topic:str, event:dict):
         try:
             result = self.validator.validation_by_category(topic, event)
-            log_event('info','finish validate process')
+            log_event('info','finish validate process',{'entity_id':event['entity_id']})
 
             if not result['is_valid']:
                 event['not_collect_information'] = result['info']
@@ -83,7 +87,7 @@ class Orchestrator():
                 self.mongodb.db[topic].insert_one(event) 
                 self.update_bank(topic,event)
         except Exception:
-            log_event()
+            log_event('error','failed handle_event',{'entity_id':event['entity_id']})
                  
     def run(self):
         try:
