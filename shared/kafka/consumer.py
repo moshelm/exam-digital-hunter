@@ -24,7 +24,8 @@ class KafkaConsumer():
                 if msg.error():
                     self.logger.error(f'there is a error {msg.error()}')
                 data = deserialize_json(msg.value())
-                callback(data)
+                
+                callback(msg.topic(), data)
         except Exception:
             self.logger.critical('consumer failed running',exc_info=True)
             raise
