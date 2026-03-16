@@ -18,13 +18,13 @@ services:
     environment:
       - discovery.type=single-node
       - 'ES_JAVA_OPTS=-Xms512m -Xmx512m'
-      - xpack.monitoring.enabled=false
+      - xpack.security.enabled=true
     volumes:
       - elastic_data:/usr/share/elasticsearch/data
     healthcheck:
       test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
-      interval: 1m30s
-      timeout: 30s
+      interval: 30s
+      timeout: 20s
       retries: 5
       start_period: 30s
   kafka:
