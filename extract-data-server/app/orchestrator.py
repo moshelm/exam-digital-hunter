@@ -3,6 +3,8 @@ from shared.kafka.producer import KafkaProducer
 from shared.mongodb_manager import MongodbManager
 from shared.logger import log_event
 from validate_manager import Validator
+from shared.haversine import haversine_km
+
 
 class Orchestrator():
     def __init__(self, mongodb: MongodbManager, producer:KafkaProducer, consumer:KafkaConsumer, mongodb_collection_base:str, validator:Validator):
@@ -41,6 +43,7 @@ class Orchestrator():
             
             if not doc_in_bank:
                 new_details['priority_level'] = 99
+                new_details['distance_from_last_location'] = 0
                 self.mongodb.db[self.collection_base].insert_one(new_details)
             else:
                 if doc_in_bank.get('attacks_numbers'):
@@ -48,6 +51,9 @@ class Orchestrator():
                 if doc_in_bank.get('last_time_update_location'):
                     if doc_in_bank['last_time_update_location'] > new_details['last_time_update_location']:
                         new_details['last_time_update_location'] = doc_in_bank['last_time_update_location']
+                    else:
+                        new_details['distance_from_last_location'] = haversine_km(doc_in_bank['reported_lat'],doc_in_bank['reported_lon'],event['reported_lat'],event['reported_lon'])
+
                 if doc_in_bank.get('status'):
                     ["destroyed", "damaged", "no_damage"]
                     if doc_in_bank['status'] == "damaged" and new_details['status'] == 'no_damage':
