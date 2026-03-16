@@ -14,12 +14,16 @@ def main():
         producer = KafkaProducer(config.kafka_bootstrap,config.kafka_producer_topic)
         consumer = KafkaConsumer(config.kafka_bootstrap, config.kafka_group, config.kafka_consumer_topics)
         validator = Validator(config.kafka_consumer_topics)
-
+        log_event('info','create clients of servers')
         manager = Orchestrator(mongodb, producer, consumer, config.mongodb_collection_base, validator)
 
         manager.run()
     except Exception:
-        log_event()
+        log_event('error','main running failed')
+    finally:
+        if producer:
+            producer.flush()
+            log_event('info','flushing all events')
 if __name__=='__main__':
     main()
 
