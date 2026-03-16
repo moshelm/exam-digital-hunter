@@ -10,11 +10,11 @@ class Configuration():
         self.mongodb_collection_base = os.getenv("MONGODB_COLLECTION",'targets bank') 
         
         kafka_host = os.getenv("KAFKA_HOST",'localhost') 
-        kafka_port = os.getenv("KAFKA_PORT",'27017') 
+        kafka_port = os.getenv("KAFKA_PORT",'9092') 
         kafka_group_id = os.getenv('KAFKA_GROUP_ID','extract')
         
         self.kafka_producer_topic = os.getenv('KAFKA_PRODUCER_TOPIC','')
-        self.kafka_consumer_topics = os.getenv('KAFKA_CONSUMER_TOPICS','').split(',')
+        self.kafka_consumer_topics = os.getenv('KAFKA_CONSUMER_TOPICS','intel,attack,damage').split(',')
 
         self.kafka_bootstrap = {'bootstrap.servers':f'{kafka_host}:{kafka_port}'}
         self.kafka_group = kafka_group_id
