@@ -14,7 +14,7 @@ class KafkaProducer():
 
     def run(self, data):
         try:
-            value = serialize_json(data,self.logger)
+            value = serialize_json(data)
             self.producer.produce(self.topic,value, callback=self.delivery)
             log_event('info','new event send in success')
         except Exception:
