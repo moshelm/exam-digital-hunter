@@ -30,6 +30,7 @@ class Orchestrator():
         try:
             entity_id = event['entity_id']
             doc_in_bank :dict = self.mongodb.db[self.collection_base].find_one(entity_id)
+            
             new_details = {} 
             
             if topic =='intel':
@@ -43,25 +44,29 @@ class Orchestrator():
             if topic == 'damage':
                 new_details['status'] = event['result']
             
+            # initial entity
             if not doc_in_bank:
+
                 new_details['priority_level'] = 99
                 new_details['distance_from_last_location'] = 0
                 self.mongodb.db[self.collection_base].insert_one(new_details)
                 log_event('info','new entity in target bank',{'entity_id':entity_id})
             else:
+                # entity already in the bank. update by time of event.
                 if doc_in_bank.get('attacks_numbers'):
-                    new_details['attacks_numbers'] +=doc_in_bank['attacks_numbers']
+                    new_details['attacks_numbers'] += doc_in_bank['attacks_numbers']
+                
+                # check what is the last time.
                 if doc_in_bank.get('last_time_update_location'):
                     if datetime.fromisoformat(doc_in_bank['last_time_update_location']) > datetime.fromisoformat(new_details['last_time_update_location']):
                         new_details['last_time_update_location'] = doc_in_bank['last_time_update_location']
                     else:
                         new_details['distance_from_last_location'] = haversine_km(doc_in_bank['reported_lat'],doc_in_bank['reported_lon'],event['reported_lat'],event['reported_lon'])
-
+                # update status only if it useful
                 if doc_in_bank.get('status'):
-                    ["destroyed", "damaged", "no_damage"]
                     if doc_in_bank['status'] == "damaged" and new_details['status'] == 'no_damage':
                         new_details['status'] = doc_in_bank['status']
-            
+                # update document 
                 self.mongodb.db[self.collection_base].update_one({'entity_id':entity_id},new_details,True)
                 log_event('info','update document',{'entity_id':entity_id})
         except Exception:
