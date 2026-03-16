@@ -23,8 +23,8 @@ services:
       - elastic_data:/usr/share/elasticsearch/data
     healthcheck:
       test: curl -s http://elasticsearch:9200 >/dev/null || exit 1
-      interval: 30s
-      timeout: 20s
+      interval: 40s
+      timeout: 30s
       retries: 5
       start_period: 30s
   kafka:
@@ -50,23 +50,31 @@ services:
 
     volumes:
       - kafka_kraft:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD", "nc", "-vz", "localhost", "9092"]
+      interval: 30s
+      timeout: 30s
+      retries: 5
+      start_period: 10s
 
 
-  simulator:
-    build: ./students_part_1
-    depends_on:
-      kafka:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
+  # simulator:
+  #   build: ./students_part_1
+  #   depends_on:
+  #     kafka:
+  #       condition: service_healthy
+  #     elasticsearch:
+  #       condition: service_healthy
   extract-data-server:
     build: ./extract-data-server
+    container_name: extract-data
     volumes:
       - ./shared:/shared
+      - ./extract-data-server/app:/app
     environment:
       - PYTHONPATH=/app:/
     env_file:
-      - .env
+      - example.env
     depends_on:
       kafka:
        condition: service_healthy
@@ -74,7 +82,16 @@ services:
        condition: service_healthy
       mongodb:
        condition: service_healthy
-
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.0
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - elasticsearch_host=elasticsearch
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
 volumes:
   elastic_data:
   kafka_kraft:
