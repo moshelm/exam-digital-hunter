@@ -1,10 +1,10 @@
-from confluent_kafka import Consumer, Message
+from confluent_kafka import Consumer
 from logging import Logger 
 from utils.serializer import deserialize_json
 
 
 class KafkaConsumer():
-    def __init__(self,kafka_config:dict, topics:list[str], logger:Logger):
+    def __init__(self, kafka_config:dict, topics:list[str], logger:Logger):
         self.logger = logger
         try:
             self.consumer = Consumer(kafka_config)
@@ -22,7 +22,7 @@ class KafkaConsumer():
                 if not msg:
                     continue
                 if msg.error():
-                    self.logger.error(f'there is a error {msg.error()}')
+                    self.logger.error(f'error in event. {msg.error()}')
                 data = deserialize_json(msg.value())
                 
                 callback(msg.topic(), data)
