@@ -22,7 +22,10 @@ from datetime import datetime
 
 # Initialize Elasticsearch client
 # Ensure the host 'localhost' matches your docker-compose configuration
-es = Elasticsearch(['http://localhost:9200'])
+import os 
+
+config = os.getenv('ELASTICSEARCH','http://elasticsearch:9200')
+es = Elasticsearch([config])
 
 
 def log_event(level, message, extra_info=None):
