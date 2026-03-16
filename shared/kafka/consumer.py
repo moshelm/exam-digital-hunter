@@ -23,6 +23,8 @@ class KafkaConsumer():
                     continue
                 if msg.error():
                     log_event('warning',f'error in event. {msg.error()}')
+                    continue
+
                 data = deserialize_json(msg.value())
                 
                 callback(msg.topic(), data)
