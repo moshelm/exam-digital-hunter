@@ -17,6 +17,6 @@ class Configuration():
         self.kafka_consumer_topics = os.getenv('KAFKA_CONSUMER_TOPICS','').split(',')
 
         self.kafka_bootstrap = {'bootstrap.servers':f'{kafka_host}:{kafka_port}'}
-        self.kafka_group = {"group.id": kafka_group_id}
+        self.kafka_group = kafka_group_id
 
         self.mongodb_config = f'mongodb://{mongodb_host}:{mongodb_port}'

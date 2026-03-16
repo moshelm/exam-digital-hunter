@@ -4,10 +4,12 @@ from utils.serializer import deserialize_json
 
 
 class KafkaConsumer():
-    def __init__(self, kafka_config:dict, topics:list[str], logger:Logger):
+    def __init__(self, kafka_config:dict, group_id:str, topics:list[str], logger:Logger):
         self.logger = logger
+        config = kafka_config
+        config['group.id'] = group_id
         try:
-            self.consumer = Consumer(kafka_config)
+            self.consumer = Consumer(config)
             self.logger.info('success connect to kafka')
         except Exception:
             self.logger.critical('failed connect to kafka')
