@@ -1,35 +1,34 @@
 from confluent_kafka import Producer, Message
-from logging import Logger 
-from utils.serializer import serialize_json
+from shared.logger import log_event
+from shared.utils.serializer import serialize_json
 
 class KafkaProducer():
-    def __init__(self,kafka_config:dict, topic_name:str, logger:Logger):
-        self.logger = logger
+    def __init__(self,kafka_config:dict, topic_name:str):
         try:
             self.producer = Producer(kafka_config)
-            self.logger.info('success connect to kafka')
+            log_event('info','success connect to kafka')
         except Exception:
-            self.logger.critical('failed connect to kafka')
+            log_event('error','failed connect to kafka')
             raise
         self.topic = topic_name
 
     def run(self, data):
         try:
-            value = serialize_json(data,self.logger)
+            value = serialize_json(data)
             self.producer.produce(self.topic,value, callback=self.delivery)
-            self.logger.info('new event send in success')
+            log_event('info','new event send in success')
         except Exception:
-            self.logger.error("failed to sent new event",exc_info=True)
+            log_event('warning',"failed to sent new event")
     def delivery(self, err: Message, msg:Message):
         if err:
-            self.logger.error(f'failed to sent new event.{err}')
+            log_event('warning',f'failed to sent new event.{err}')
         else:
-            self.logger.info('success sending new event')
+            log_event('info','success sending new event')
     def flush(self):
         try:
             self.producer.flush()
-            self.logger.info('flushing all events')
+            log_event('info','flushing all events')
         except Exception:
-            self.logger.error('failed to flush')
+            log_event('error','failed to flush')
 
 
